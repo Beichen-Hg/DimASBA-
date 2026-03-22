@@ -1,0 +1,1008 @@
+[
+    {
+        "type": "text",
+        "text": "DimStance: Multilingual Datasets for Dimensional Stance Analysis Jonas Becker1,∗, Liang-Chih $\\mathbf { Y } \\mathbf { u } ^ { 2 , * }$ , Shamsuddeen Hassan Muhammad3, Jan Philip Wahle1, Terry Ruas1, Idris Abdulmumin4, Lung-Hao Lee5, Nelson Odhiambo6, Lilian Wanzare6, Wen-Ni Liu5, Tzu-Mi $\\mathbf { L i n ^ { 5 } }$ , Zhe-Yu $\\mathbf { X } \\mathbf { u } ^ { \\mathrm { 5 } }$ , Ying-Lung Lin7, Jin Wang8, Maryam Ibrahim Mukhtar9, Bela Gipp1, Saif M. Mohammad10 ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1University of Göttingen, 2Yuan Ze University, 3Imperial College London, 4University of Pretoria, 5National Yang Ming Chiao Tung University, 6Maseno University, 7Central Police University Taiwan, 8Yunnan University, ${ } ^ { 9 } \\mathbf { B }$ ayero University Kano, 10National Research Council Canada ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "\\*Contact: jonas. becker@uni-goettingen.de, lcyu@saturn.yzu.edu.tw ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Offensive Content Warning: This paper contains examples of offensive language for research purposes. ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Abstract ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Stance detection is an established task that classifies an author’s attitude toward a specific target into categories such as Favor, Neutral, and Against. Beyond categorical stance labels, we leverage a long-established affective science framework to model stance along realvalued dimensions of valence (negative– positive) and arousal (calm–active). This dimensional approach captures nuanced affective states underlying stance expressions, enabling fine-grained stance analysis. To this end, we introduce DIMSTANCE, the first dimensional stance resource with valence– arousal (VA) annotations. This resource comprises 11,746 target aspects in 7,365 texts across five languages (English, German, Chinese, Nigerian Pidgin, and Swahili) and two domains (politics and environmental protection). To facilitate the evaluation of stance VA prediction, we formulate the dimensional stance regression task, analyze cross-lingual VA patterns, and benchmark pretrained and large language models under regression and prompting settings. Results show competitive performance of fine-tuned LLM regressors, persistent challenges in low-resource languages, and limitations of token-based generation. DIMSTANCE provides a foundation for multilingual, emotion-aware, stance analysis and benchmarking. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "protect the environment.” 77 and the target environment, a stance detection system should label the stance as Favor. In recent years, a wide range of applications and datasets for stance detection have been proposed (Hardalov et al., 2022; Zhang et al., 2024; Pangtey et al., 2025), alongside the emergence of specialized task settings such as multimodal (Zhou et al., 2025; Zhang et al., 2025) and conversational (Ding et al., 2025; Marreddy et al., 2025) stance detection. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Despite these advances, existing stance detection work still relies on categorical labels for classification. In many settings, stances are rarely purely “for” or “against”. Even expressions sharing the same stance can exhibit substantial variation in affective tone and intensity, motivating the need to identify the affective states underlying stance expressions. By measuring the emotions that drive stance at scale, we can sharpen our understanding of why opinions harden— and, in turn, inform strategies to mitigate the intense polarization seen in debates such as climate change or politics. ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "1 Introduction ",
+        "text_level": 1,
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Stance detection aims to automatically identify an author’s stance from text toward a specific target (e.g., a person, organization, or policy) (Chandra et al., 1981; Mohammad et al., 2016; Küçük and Can, 2020; AlDayel and Magdy, 2021). The stance is typically classified into predefined labels such as Favor, Against, or Neither (Neutral). For example, given the sentence “We must act now to ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "To address these limitations, we draw insights from long-established affective science frameworks (Russell, 1980, 2003), which model evaluative attitudes along dimensions of valence (displeasure– pleasure/negative–positive) and arousal (sluggish– excited/calm– active). As illustrated by the example stance expressions in Fig. 1, English and Nigerian Pidgin would both receive Favor in a categorical scheme, yet the dimensional approach further distinguishes the former as strong, highly aroused support and the latter as mild, low-arousal approval. Likewise, both German and Chinese correspond to Against, although the former reflects emotionally charged opposition while the latter conveys calm disagreement. This enhanced granularity captures the nuances of evaluative attitudes, facilitating a finer-grained stance analysis across languages and domains. Thus, this enriched form of stance ",
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "Arousal English_Environmental Protection It’s great that after coal plants shut German_Politics down there are transmission lines to Der Verfassungsschutz ist keine connect solar and wind resources too. Lösung, sondern gehört aufgelöst. V#A: 7.75 7.62   \nThe Offcie for the Protection of the Constitution ishnoutldabseolduitsisoonl,vbeudt. .S..nwyaiehinlid_ioPomlilitikcusa wapinzani haswa \\*\\*\\*\\* V#A: 2.10#7.20 tunategemea kuonana siku za usoni ... you were the real rivals, ... looking to meet again in the future V#A: 4.80#5.50 8 9 Valence Chinese_Environmental Protection Nigerian Pidgin_Politics @peterobi your mandate can only be   \n我覺得政府在綠能運輸的支持上還不夠 delayed but cannot be denied please   \nI feel that the government's support for my fellow obedient be calm.   \ngreen transportation is still insuffcient. @peterobi your mandate can only be V#A: 4.25 4.62 delayed but cannot be denied please my fellow supporters be calm. V#A: 6.20 4.23 ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "detection can be of considerable value in analyzing and understanding public opinion on complex issues such as climate change, vaccine hesitancy, the role of AI in society, and government policies. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "To our knowledge, no existing stance detection resources adopt a valence-arousal (VA) representation. To fill this gap, we introduce the DIMSTANCE, the first dimensional stance resource manually annotated with continuous VA scores. The datasets contain 11,746 target aspects across 7,365 texts and cover five high- and low-resource languages (Chinese, English, German, Nigerian Pidgin, and Swahili) across two domains (politics and environmental protection). We introduced a new task, termed dimensional stance regression, which requires systems to predict continuous VA scores for each given target aspect within a stance expression. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We evaluate a range of pre-trained language models (PLMs) and large language models (LLMs) under regression and prompting settings and analyze cross-lingual VA patterns. We observe that fine-tuned LLM regressors generally outperform prompted LLMs and PLM regressors. Yet, prompting-based LLMs can serve as a costefficient alternative. The results further highlight challenges in low-resource languages and limitations of token-based VA prediction. We make our datasets public providing a pivotal foundation for multilingual dimensional stance analysis to address language-specific nuances and challenges. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "Our contributions are summarized as follows: ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We present the first DIMSTANCE datasets, spanning five high- and low-resource languages and two domains. We introduce a dimensional stance regression task that integrates valence– arousal representations into the stance detection framework. We provide baseline results across PLM regressors, prompted LLMs, and fine-tuned LLM regressors, facilitating future benchmarking for dimensional stance analysis. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "All of the data and baselines will be made freely available on the project website. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2 The DIMSTANCE Dataset Collection ",
+        "text_level": 1,
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We detail the construction of the dataset, covering data sources, preprocessing steps, and the annotation workflow. ",
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "2.1 Data Sources ",
+        "text_level": 1,
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "We collect data from five languages, chosen to provide a balance between high-resource languages (English, German, and Chinese) and low-resource languages (Nigerian Pidgin and Swahili). We focus on the domains of politics and environmental protection because they contain a mixture of intense and calm emotional expressions, as well as diverse stances. ",
+        "page_idx": 1
+    },
+    {
+        "type": "table",
+        "img_path": "images/c795f0e7b12f0ff0060330e3dee9a783923e93bb87dd031599ca2816c5753772.jpg",
+        "table_caption": [],
+        "table_footnote": [],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Table 1: Dataset overview. For each language, we report the domain, data source(s), total number of annotators, train/dev/test splits, and aggregated totals. All counts are reported as number of texts number of target aspects. Annotation reliability is measured by root mean squared error (RMSE) for valence#arousal (V#A) ratings. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "English. Data for the training split is collected from the environmental protection domain of EZSTANCE (Zhao and Caragea, 2024). The dev and test splits are obtained from Reddit texts2, using the same keywords as in EZ-STANCE. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "German. Sampled from Wahl-O-Mat Archive, provided by the Federal Agency for Civic Education of Germany3. The data contains responses by political parties to political statements. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Chinese. Collected messages from the Threads platform4. Crawling is performed using a predefined set of Chinese query keywords about environmental protection. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Nigerian Pidgin. Sampled posts and comments from the X platform The discussions concern Nigerian elections, i.e., politics, ranging from January 1st to March 8th, 2023. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "Swahili. Combined data from Afrisenti (Muhammad et al., 2023), HateSpeech Kenya (Ombui, 2022), and Politikweli (Amol et al., 2024), covering political tweets from the X platform. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "2.2 Pre-processing and Quality Control ",
+        "text_level": 1,
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "We preprocess all data by removing duplicates, invisible characters, and faulty encoding. For raw texts that do not provide marked target aspects already, we use LLMs (eng: ChatGPT-4o, deu: meta-llama/Llama-3.3-70B-Instruct, pcm/swa: Gemini-2.0-flash-lite) to extract candidate target aspects and use regex text matching to identify their exact token positions. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "2.3 Annotation Process ",
+        "text_level": 1,
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "To ensure the validity of automatically extracted target aspects, we conduct a majority vote with five human annotators (cf. annotation guidelines in Section C). If a target aspect is marked as invalid by the majority, it is discarded. Each valid target aspect is annotated by five native speakers of the respective language, paid at least minimum wage. Since a single text may contain multiple target aspects, we present each target-text pair as an independent instance for annotation, rating each on the valence and arousal scales. The valence scale ranges from 1 (highly negative) to 5 (neutral) to 9 (highly positive). The arousal scale ranges from 1 (highly unaroused) to 9 (highly aroused). We average the ratings of the five annotators to obtain the final gold valence and arousal values. This setup reduces annotator-specific noise, yielding more stable and consistent valence– arousal labels. We report the annotation guidelines (cf. Section C) and the annotation interface (cf. Section E). ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "2.4 Annotators’ Reliability ",
+        "text_level": 1,
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "The annotation reliability is measured using the Root Mean Squared Error (RMSE) for both valence and arousal ratings. For each annotator, the RMSE is calculated by averaging the squared differences between their scores and the gold standard (defined as the mean score of all five annotators) across all instances. The final reliability is reported as the mean RMSE across all five annotators, as shown in Table 1. ",
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "In general, arousal annotations show lower reliability than valence annotations, suggesting that arousal is more challenging for humans to evaluate. This is likely because valence provides more distinct perceptual cues, whereas arousal is often subtle and context-dependent. This observation is consistent with previous studies reporting lower reliability for arousal annotations (Buechel and Hahn, 2017; Mohammad, 2018; Lee et al., 2022). ",
+        "page_idx": 2
+    },
+    {
+        "type": "image",
+        "img_path": "images/abfe99d48fb5b9e26ea9e73444040488a4659db8b65a9e593c9239aabe06c379.jpg",
+        "img_caption": [
+            "Figure 2: VA distributions by language. For each language, we show a kernel density plot of the VA scatter space. We show the top ten most prevalent targets in the dataset. An extensive list of the top targets is included in Table 3. "
+        ],
+        "img_footnote": [],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "2.5 Final Data Statistics ",
+        "text_level": 1,
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Table 1 summarizes the dataset across five languages, including data sources, number of annotators, and train/dev/test splits. Each split is shown as texts/target aspects. The dataset comprises a total of 7,365 texts and 11,746 target aspects across all languages. ",
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "3 Dataset Analysis ",
+        "text_level": 1,
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "This section provides an analysis of the VA distributions of stance instances and target usage. ",
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "U-shaped distributions. Fig. 2 shows the VA distributions of stance instances across different languages and domains. The red shaded regions visualize the joint VA distribution of stance instances, with darker colors indicating higher instance density. The black curve illustrates the relationship between valence and arousal. Overall, all datasets exhibit a broadly U-like relationship between valence and arousal; that is, arousal tends to be lowest around neutral valence and increases toward both negative and positive extremes. ",
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "Target usage analysis. Despite the U-like structural consistency observed in VA distributions, their distribution and symmetry vary across languages and domains. The English data exhibit a relatively balanced valence distribution, with around ",
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "$5 0 \\%$ positive and $3 9 \\%$ negative instances (cf. Table 2). The arousal distribution is concentrated in the high-value region across both valence polarities (positive mean: 6.845; negative mean: 6.476). This finding suggests that environmental stance expressions are typically associated with increased arousal. For example, as shown in Table 3, the negatively valenced expressions include concerns about the urgency of climate change, opposition to coal and coal plants, as well as criticism of perceived government inaction. On the positive side, these expressions include supportive orientations toward environmental awareness and related energy-transition targets. Notably, although EPA is associated with near-neutral valence overall, this pattern is largely driven by a mixture of positive and negative expressions. ",
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "The German data show a higher concentration of positive valence ( $6 9 \\%$ positive vs $2 5 \\%$ negative), with arousal at a moderate to high level (overall mean: 5.76; Table 3). This is likely due to the source data, which are written by political parties. The most frequent targets, such as Bildung (education) and ÖPNV (public transport), are consistent with this observation, as these policy areas are typically proposed as improvements following an election. In contrast, Schuldenbremse (debt brake) emerges as the only top ten target associated with ",
+        "page_idx": 3
+    },
+    {
+        "type": "table",
+        "img_path": "images/a50a610ad495111d46a4366efd37a6600a5055a401bef33d815993428a8d6d80.jpg",
+        "table_caption": [
+            "Table 2: VA statistics by language. The data are partitioned into positive $( \\mathrm { V } { > } 5 . 5 )$ , neutral ( $4 . 5 { < } = \\mathrm { V } { < } = 5 . 5$ ), and negative $( \\mathrm { V } { < } 4 . 5 )$ subsets. For each subset, we report the proportion of stance instances $( \\% )$ and the corresponding counts (n), as well as the mean VA values with standard deviations (SD) shown in tiny. "
+        ],
+        "table_footnote": [],
+        "page_idx": 4
+    },
+    {
+        "type": "table",
+        "img_path": "images/a78fa9a8f39942e264a8540363d6d0a36e43f1b23f63135f04544aeb708b6edc.jpg",
+        "table_caption": [
+            "Table 3: Top 10 targets per language. For each target, the count (n) and the corresponding percentage $( \\% )$ are reported, along with the mean VA values. The Overall row reports the total number of targets and overall mean VA values. Similar targets are grouped (e.g., Environmental Protection Agency and EPA, or coal plant and coal plants). "
+        ],
+        "table_footnote": [],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "negative valence. ",
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The Chinese data display a more compact distribution, with both positive and negative instances clustering around mid-range valence (positive mean: 6.068; negative mean: 3.893) and moderate arousal (overall mean: 5.42). The distribution shows limited dispersion along both dimensions, suggesting that stance expressions are generally mild. Further analysis reveals substantial overlap in the top-10 most frequent targets between Chinese and English. Notably, energy-transition– related targets in Chinese tend to have a closer neutral valence. This observation suggests that even when targeting similar environmental issues, stance expressions may exhibit different affective profiles across languages, potentially influenced by cultural, linguistic, and socio-contextual factors. ",
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "The Nigerian Pidgin data show a sparsely populated neutral region, resulting in limited continuity in the valence distribution. In addition, the distribution is dominated by negative valence ( $6 3 \\%$ negative vs. $3 6 \\%$ positive), and higher arousal is also observed at the negative valence end (mean: 6.494). This distribution can be attributed to the electoral nature of the source data. The most frequent targets also largely consist of political figures (e.g., Peter Obi, Atiku) and political institutions (e.g., INEC, APC), which are particularly likely to trigger emotionally charged political discussions and are often framed in a negative or critical manner in election-related discourse. ",
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "",
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "Similar to Nigerian Pidgin, Swahili data also leans towards negative valence （ $6 4 \\%$ negative vs $3 2 \\%$ positive). Upon inspection of the most frequent targets, we find that Swahili data contains a noticeable number of toxic examples (e.g., pussy, nigga). Also, Swahili data shows the highest mean arousal (6.99) towards the targets. Nigerian Pidgin and Swahili data originate from the X platform, written by citizens of the respective countries. By contrast, the German source data is weighted towards positive-valence examples and is produced by political parties. Thus, the difference between political parties’ and the general public’s perception is evident when comparing these languages. ",
+        "page_idx": 4
+    },
+    {
+        "type": "table",
+        "img_path": "images/e5ac9cd482e0a59405429050b5e27d7d17d65f06eda75e62a9ce450fbdd3baaf.jpg",
+        "table_caption": [],
+        "table_footnote": [
+            "Table 4: Comparison of PLM and LLM approaches. RMSE of dimensional stance regression. Bold indicates the lowest (best) result within each model family for each language. Closed LLMs use 16-shot prompting. "
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "4 Experiments ",
+        "text_level": 1,
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "This section describes the evaluation of the DIMSTANCE datasets under the dimensional stance regression task, including the experimental setup, baseline results, and the corresponding analysis. ",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "4.1 Setup",
+        "text_level": 1,
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Task. The goal of dimensional stance regression is to predict VA scores for each target aspect within a given text on a continuous scale from one to nine. The data split sizes are reported in Table 1. ",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Models. We evaluate various PLMs and LLMs across three groups. ",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "PLM regressors. This group provides a baseline under numerical regression, representing prevailing approaches to structured text regression using traditional encoder-based models. We employ three multilingual PLMs, XLM-R (Conneau et al., 2020), RemBERT (Chung et al., 2021), and LaBSE (Feng et al., 2022), each trained independently on the training split of its respective dataset. For these models, a dedicated regression head comprising a linear layer and dropout is applied to the sentence-level representation. The entire architecture is optimized end-to-end via mean squared error (MSE) loss to predict VA scores. ",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Closed LLMs (prompting). This group provides a baseline under free-form numerical generation, leveraging advanced LLMs through prompting without parameter updates. Three closedsource LLMs, GPT-5 mini (OpenAI, 2025), Gemini 2.5 Flash (Team and Google, 2025), and Kimi K2 (Moonshot AI, 2025), are evaluated under zeroshot and few-shot settings. For the few-shot setting, in-context examples are selected from the first $k$ samples in the training split. These models are accessed via their respective APIs to directly generate VA scores based on their inherent reasoning. ",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "LLM regressors (fine-tuning). We provide a numerical regression baseline by adapting LLM representations for VA prediction. Four open-source LLMs, Ministral-3-14B (Mistral AI, 2025), Phi4-14B (Microsoft, 2024), Llama-3.3-70B (Dubey et al., 2024), and Qwen-2.5-72B (Yang et al., 2024), are adapted via 4-bit QLoRA (Dettmers et al., 2023) for parameter-efficient fine-tuning. Following the PLM setup, a regression head is attached to the hidden state of the last token. The LoRA adapters and the regression layer are jointly optimized using MSE to estimate VA scores. Further implementation details are given in Section A. ",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Evaluation metric. We adopt RMSE to measure prediction error in the VA space, defined as ",
+        "page_idx": 5
+    },
+    {
+        "type": "equation",
+        "text": "$$\nR M S E _ { V A } = \\sqrt { \\sum _ { i = 1 } ^ { N } \\frac { ( V _ { p } - V _ { g } ) ^ { 2 } + ( A _ { p } - A _ { g } ) ^ { 2 } } { N } }\n$$",
+        "text_format": "latex",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "where $N$ is the total number of instances; $V _ { p }$ and $A _ { p }$ denote the predicted valence and arousal values for an instance; and $V _ { g }$ and $A _ { g }$ denote the corresponding gold values. ",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "4.2 Experimental Results ",
+        "text_level": 1,
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Table 4 summarizes the results for dimensional stance regression across PLMs and LLMs. PLM regressors provide baseline results under numerical regression. Within the PLM family, different models exhibit language- specific strengths, with no single model dominating across all languages. Overall, XLM-R achieves the lowest average RMSE across languages. ",
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "Closed LLMs are evaluated under generative numerical prediction using 16-shot prompting. ",
+        "page_idx": 5
+    },
+    {
+        "type": "image",
+        "img_path": "images/5cbd7fef775250444849be1f59a80c9816b99c164c343f4672e7c5ac9f8c5190.jpg",
+        "img_caption": [
+            "Figure 3: English VA prediction scatter plots. Comparison of gold and predicted VA distributions from selected models on the English test set. The $\\mathbf { \\boldsymbol { x } }$ -axis shows valence, and the y-axis shows arousal on a one to nine scale. "
+        ],
+        "img_footnote": [],
+        "page_idx": 6
+    },
+    {
+        "type": "image",
+        "img_path": "images/7ae888452fa290ab552f1533ab31fe6c874bcbaf843034cc02dbb9ce7ee3ea13.jpg",
+        "img_caption": [
+            "Figure 4: Trendlines of few-shot performance. We compare the prompting of three closed LLMs. The xaxis represents the number of shots, ranging from zero to a 32-shot setup. The y-axis shows the RMSE. "
+        ],
+        "img_footnote": [],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Among these models, Kimi K2 achieves the strongest overall performance across languages. When compared with PLM regressors trained on the full training set, LLMs with few-shot prompting achieve competitive or better performance on average, particularly in English, German, and Nigerian Pidgin, while underperforming in Chinese and Swahili. Nevertheless, prompting-based LLMs can serve as data-efficient baselines for dimensional stance regression. ",
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "For LLM regressors, fine-tuned models generally outperform prompted LLMs, yielding lower RMSE in most languages. More consistent gains are observed for larger 70B-scale models. These findings indicate that, beyond prompting, LLM representations can be effectively adapted for regression, offering a viable alternative for modeling continuous VA scores. ",
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Examining the results by language, Chinese consistently exhibits the best performance across models. This can be attributed to its concentrated VA distribution around the neutral region, with a limited range of variation. In contrast, performance on Swahili is generally lower, likely reflecting the challenges of low-resource languages. Nigerian Pidgin does not show a comparable decline, possibly due to its English-like characteristics. ",
+        "page_idx": 6
+    },
+    {
+        "type": "table",
+        "img_path": "images/5542da90d32f3bc53f01708ed6edec0f2f9781ef42b65007f6270d01b965c8a4.jpg",
+        "table_caption": [
+            "Table 5: Sensitivity to prompt phrasing. Performance of LLMs across three prompt paraphrases on the English test set. The prompts are shown in Section G. "
+        ],
+        "table_footnote": [],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "",
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "4.3 Analysis ",
+        "text_level": 1,
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Alignment of predicted and gold VA distributions. Fig. 3 presents the gold and predicted VA distributions on the English test set 6. LLM prompting produces grid-like (coarse-score) VA distributions across all languages, likely due to its token-based generation, which tends to yield discrete numerical outputs when predicting continuous VA scores. In contrast, distributions produced by LLM regressors are more continuous, aligning closely with the gold distributions, particularly for the 70B model. The disadvantages of discretized outputs from LLM prompting become particularly evident under compact VA distributions with limited variation, such as Chinese, as reflected by their higher RMSE compared to all regressors. In such cases, regression-based models can more easily align with the gold distributions. ",
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "Effect of few-shot examples. Fig. 4 shows that increasing the number of shots on the English test set consistently improves performance across models. Performance tends to reach a plateau at 16 shots for all closed LLMs except for Gemini 2.5 Flash. Notably, Kimi K2 ultimately outperforms the other models despite exhibiting the lowest performance in the zero-shot setting. ",
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Effect of prompt variations. We test the paraphrased variants of prompts outlined in Section G. As shown in Table 5, the performance of closed LLMs appears to be highly dependent on prompt wording when predicting VA scores on the English test set using different paraphrases of the same instruction. ",
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "5 Related Work ",
+        "text_level": 1,
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Categorical stance. Prior work on categorical stance detection has expanded primarily along three axes: language coverage, scale, and domain specificity. Early benchmarks focused on English Twitter data with coarse labels (favor/against/neutral), such as the SemEval stance dataset of Mohammad et al. (2016). Multilingual extensions followed, including IberEval 2017– 2018 for Catalan and Spanish tweets on the Catalan independence referendum (Zotova et al., 2020), and X-Stance, which covers German, French, and Italian political discourse using question-based target representations (Vamvas and Sennrich, 2020). Large-scale English resources include P-Stance (Li et al., 2021) and COVID-19-Stance (Glandt et al., 2021), both centered on prominent political or societal targets. More recent benchmarks emphasize generalization and zero-shot settings, such as CSTANCE for Chinese (Zhao et al., 2023) and EZSTANCE for English with claim- and noun-phrase targets (Zhao and Caragea, 2024). PolitiSky24 introduces user-level and platform-specific perspectives on Bluesky (Rostami et al., 2025). Domainfocused datasets such as ClimateStance and ClimateEng (Vaid et al., 2022) broaden topical coverage but continue to rely on categorical stance labels. ",
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Emotion-aware stance. While categorical stance remains an established field, the emergence of dimensional sentiment and emotion analysis (Mohammad, 2018; Lee et al., 2022, 2024; Muhammad et al., 2025) has led to recent work that investigates how continuous emotion features can aid stance analysis. PoliStance‑VAE disentangles latent valence, arousal, and dominance using a variational autoencoder and achieves state‑of‑the‑art cross‑target results on P‑Stance and SemEval‑2016, showing the utility of fine‑grained emotional representations (Xu et al., 2025). TWISTED combines toxicity, morality, and speech‑act cues with lexicon‑derived valence, arousal, and dominance to improve stance detection across datasets such as SemEval‑2016, P‑Stance, COVID‑19‑Stance, and climate change (Upadhyaya et al., 2023b). For climate change tweets, adding emotion recognition and intensity prediction helps distinguish climate change deniers, whose posts often contain high-intensity anger and disgust, from believers, whose tweets express anticipation and trust (Upadhyaya et al., 2023a). ClimaConvo is a large Twitter corpus covering relevance, stance, hate speech, humor, and related dimensions, enabling deeper analysis of climate change discourse (Shiwakoti et al., 2024). Other work analyzes how rich representations of stance contexts across Reddit communities reveal patterns of community identity and engagement beyond lexical similarity (Aggarwal et al., 2023). ",
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "",
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Research gap. The above emotion-aware stance studies primarily rely on dimensional sentiment resources to enhance stance analysis. However, a critical gap remains: the lack of human-annotated dimensional datasets for stance analysis. This limitation is particularly pronounced for low-resource languages such as Swahili and Nigerian Pidgin, which currently lack even basic stance resources. ",
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "6 Conclusion ",
+        "text_level": 1,
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "We present DIMSTANCE, the first dimensional stance resource with human VA annotations, covering five high- and low-resource languages across two domains. Building on this resource, we introduce dimensional stance regression as a unified framework for modeling stance through affective representations. Our analysis shows that the VA space effectively captures the diverse ways stances are expressed across languages and domains. This complements traditional polarity-based analysis with a more nuanced and affective perspective. Experiments with regression and numerical generation baselines reveal substantial performance gaps in low-resource languages and highlight the limitations of token-based VA prediction, underscoring key challenges and opportunities for advancing multilingual fine-grained stance analysis. ",
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "Limitations ",
+        "text_level": 1,
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Although DIMSTANCE is multilingual, interpretations of valence and arousal can vary across cultures, thereby affecting cross-lingual comparability. We mitigate this by using five native-speaker annotators per language and sample, consistent 1– 9 VA scales, and shared guidelines; nonetheless, results should be interpreted as comparisons across language-community-domain settings. Expanding language coverage and testing measurement invariance are important directions for future work. ",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Inter-annotator agreement is acceptable, yet consistently lower for arousal than for valence (e.g., 1.70 vs 2.20 RMSE for English). This observation is consistent with previous studies reporting lower reliability for arousal annotations (Buechel and Hahn, 2017; Mohammad, 2018; Lee et al., 2022). We average ratings across five annotators and provide explicit guidance. Downstream models should account for this uncertainty (e.g., confidence intervals, robustness checks) (Troiano et al., 2021). ",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Some datasets (e.g., Nigerian Pidgin) include more samples of negative or positive valence, which may bias models during training and inflate performance in the majority regions of the VA space. We document these differences and encourage explicit handling (e.g., reweighting or stratified sampling) when training or comparing models across languages (Chawla et al., 2002). ",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Ethical Considerations ",
+        "text_level": 1,
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Stance is often conveyed in subtle, nuanced, and complex ways that may not even be the core intention of the speaker’s utterance. Furthermore, there can be considerable variation in how individuals express their stance. It should be noted that human-annotated labels of stance capture perceived stance, and that in several cases this may be different from the speaker’s true stance. Nonetheless, since language is a key mechanism to communicate, at an aggregate level, perceived stance tends to correlate with true stance. Thus, even a perceived stance is useful at an aggregate level. However, caution must be exercised when using individual inferred stances to make decisions about individuals, especially those involving high-stakes consequences. ",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Similar to other enabling technologies, stance detection can be used in inappropriate and harmful ways to society. For example, it can be used to identify individuals who are opposed to certain government policies, and this information can be used to unfairly persecute those individuals. Another troubling, and perhaps more pernicious example, is the use of stance detection to manipulate user behavior. For example, voting in a certain way or purchasing products. For example, if it is determined that one cares deeply about a particular issue, that person can be bombarded with carefully doctored information to make them more politically polarized. ",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "We strictly prohibit the use of our data for commercial or government purposes. In many ways, the ethical considerations associated with stance detection overlap with those of automatic sentiment and emotion detection. Thus, we also refer the interested reader to Mohammad (2022) for a wide-ranging discussion of relevant ethical considerations. ",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Acknowledgements ",
+        "text_level": 1,
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Jonas Becker acknowledges the support of the Landeskriminalamt NRW. ",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Jan Philip Wahle, Terry Ruas, and Bela Gipp acknowledge the support of the Lower Saxony Ministry of Science and Culture, and the VW Foundation.   \nShamsuddeen Hassan Muhammad acknowledges the support of Google DeepMind, whose funding made this work possible.   \nLiang-Chih Yu and Lung-Hao Lee acknowledge the support of the National Science and Technology Council, Taiwan, under the grants NSTC 113-2221-E-155-046-MY3 and NSTC 114-2221- E-A49-059-MY3. ",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "References ",
+        "text_level": 1,
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Jai Aggarwal, Brian Diep, Julia Watson, and Suzanne Stevenson. 2023. Investigating online community engagement through stancetaking. In Findings of the Association for Computational Linguistics: EMNLP 2023, pages 5814–5830, Singapore. Association for Computational Linguistics.   \nAbeer AlDayel and Walid Magdy. 2021. Stance detection on social media: State of the art and trends. Information Processing & Management, 58(4):102597.   \nCynthia Amol, Lilian Wanzare, and James Obuhuma. 2024. Politikweli: A swahili-english code-switched twitter political misinformation classification dataset. In Speech and Language Technologies for LowResource Languages, pages 3–17, Cham. Springer Nature Switzerland. ",
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "Sven Buechel and Udo Hahn. 2017. EmoBank: A Corpus of AnalyzeD Emotions on a Dimensional Level. In Proceedings of the 15th Conference of the European Chapter of the Association for Computational Linguistics: Volume 2, Short Papers, pages 572–578, Valencia, Spain. Association for Computational Linguistics. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Ashok KKucek. Chandra, Dexter C. Kozen, and Larry J. Stockmeyer. 1981. Alternation. Journal of the Association for Computing Machinery, 28(1):114–133. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Nitesh V. Chawla, Kevin W. Bowyer, Lawrence O. Hall, and W. Philip Kegelmeyer. 2002. Smote: synthetic minority over-sampling technique. J. Artif. Int. Res., 16(1):321–357. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Hyung Won Chung, Thibault Févry, Henry Tsai, Melvin Johnson, and Sebastian Ruder. 2021. Rethinking embedding coupling in pre-trained language models. arXiv preprint arXiv:2010.12821. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Alexis Conneau, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume Wenzek, Francisco Guzmán, Edouard Grave, Myle Ott, Luke Zettlemoyer, and Veselin Stoyanov. 2020. Unsupervised cross-lingual representation learning at scale. In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics, pages 8440– 8451. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, and Luke Zettlemoyer. 2023. QLoRA: Efficient finetuning of quantized LLMs. In Advances in Neural Information Processing Systems (NeurIPS). ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Yuzhe Ding, Kang He, Bobo Li, Li Zheng, Haijun He, Fei Li, Chong Teng, and Donghong Ji. 2025. Zeroshot conversational stance detection: Dataset and approaches. In Findings of the Association for Computational Linguistics: ACL 2025, pages 3221–3235, Vienna, Austria. Association for Computational Linguistics. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Abhimanyu Dubey and 1 others. 2024. The llama 3 herd of models. arXiv preprint arXiv:2407.21783. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Fangziao Feng, Yinfei Yang, Daniel Cer, Naveen Arivazhagan, and Wei Wang. 2022. Language -agnostic bert sentence embedding. In Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 878–891. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Kyle Glandt, Sarthak Khanal, Yingjie Li, Doina Caragea, and Cornelia Caragea. 2021. Stance Detection in COVID-19 Tweets. In Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (Volume 1: Long Papers), pages 1596–1611, Online. Association for Computational Linguistics. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Momchil Hardalov, Arnav Arora, Preslav Nakov, and Isabelle Augenstein. 2022. A survey on stance detection for mis- and disinformation identification. In ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Findings of the Association for Computational Linguistics: NAACL 2022, pages 1259–1277. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Dilek Küçük and Fazli Can. 2020. Stance detection: A survey. ACM Comput. Surv., 53(1). ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Lung-Hao Lee, Jian-Hong Li, and Liang-Chih Yu. 2022. Chinese emobank: Building valence-arousal resources for dimensional sentiment analysis. Transactions on Asian and Low-Resource Language Information Processing, 21(4):1–18. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Lung-Hao Lee, Liang-Chih Yu, Suge Wang, and Jian Liao. 2024. Overview of the sighan 2024 shared task for chinese dimensional aspect-based sentiment analysis. In Proceedings of the 10th SIGHAN Workshop on Chinese Language Processing (SIGHAN10), pages 165–174. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Yingjie Li, Tiberiu Sosea, Aditya Sawant, Ajith Jayaraman Nair, Diana Inkpen, and Cornelia Caragea. 2021. P-Stance: A Large Dataset for Stance Detection in Political Domain. In Findings of the Association for Computational Linguistics: ACL-IJCNLP 2021, pages 2355–2365, Online. Association for Computational Linguistics. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Mounika Marreddy, Subba Reddy Oota, Venkata Charan Chinni, Manish Gupta, and Lucie Flek. 2025. USDC: A dataset of $\\underline { { U } }$ ser Stance and Dogmatism in long $\\underline { { C } }$ onversations. In Findings of the Association for Computational Linguistics: ACL 2025, pages 23715–23759, Vienna, Austria. Association for Computational Linguistics. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Microsoft. 2024. Phi-4 technical report. arXiv preprint arXiv:2412.08905. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Mistral AI. 2025. Introducing Mistral 3. mistral.ai. Accessed: 2025-12-25. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Saif Mohammad. 2018. Obtaining reliable human ratings of valence, arousal, and dominance for 20,000 english words. In Proceedings of the 56th annual meeting of the association for computational linguistics (volume 1: Long papers), pages 174–184. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Saif Mohammad, Svetlana Kiritchenko, Parinaz Sobhani, Xiaodan Zhu, and Colin Cherry. 2016. A Dataset for Detecting Stance in Tweets. In Proceedings of the Tenth International Conference on Language Resources and Evaluation (LREC’16), pages 3945–3952, Portorož, Slovenia. European Language Resources Association (ELRA). ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Saif M. Mohammad. 2022. Ethics sheet for automatic emotion recognition and sentiment analysis. Computational Linguistics, 48(2):239–278. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Moonshot AI. 2025. Kimi k2: Open agentic intelligence. arXiv preprint arXiv:2507.20534. ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Shamsuddeen Hassan Muhammad, Idris Abdulmumin, Abinew Ali Ayele, Nedjma Ousidhoum, David Ifeoluwa Adelani, Seid Muhie Yimam, Ibrahim Sa’id ",
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "Ahmad, Meriem Beloucif, Saif M. Mohammad, Sebastian Ruder, Oumaima Hourrane, Pavel Brazdil, Alipio Jorge, Felermino Dário Mário António Ali, Davis David, Salomey Osei, Bello Shehu Bello, Falalu Ibrahim, Tajuddeen Gwadabe, and 8 others. 2023. AfriSenti: A Twitter sentiment analysis benchmark for African languages. In Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing, pages 13968–13981, Singapore. Association for Computational Linguistics. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Shamsuddeen Hassan Muhammad, Nedjma Ousidhoum, Idris Abdulmumin, Jan Philip Wahle, Terry Ruas, Meriem Beloucif, Christine de Kock, Nirmal Surange, Daniela Teodorescu, Ibrahim Said Ahmad, David Ifeoluwa Adelani, Alham Fikri Aji, Felermino D. M. A. Ali, Ilseyar Alimova, Vladimir Araujo, Nikolay Babakov, Naomi Baes, Ana-Maria Bucur, Andiswa Bukula, and 29 others. 2025. BRIGHTER: BRIdging the gap in human-annotated textual emotion recognition datasets for 28 languages. In Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 8895–8916, Vienna, Austria. Association for Computational Linguistics. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Edward Ombui. 2022. HateSpeech kenya. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "OpenAI. 2025. Gpt-5 system card. https://cdn.openai.com/gpt-5-system-card.pdf. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Lata Pangtey, Anukriti Bhatnagar, Shubhi Bansal, Shahid Shafi Dar, and Nagendra Kumar. 2025. Large language models meet stance detection: A survey of tasks, methods, applications, challenges and future directions. CoRR, abs/2505.08464. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Peyman Rostami, Vahid Rahimzadeh, Ali Adibi, and Azadeh Shakery. 2025. Politisky24: U.s. political bluesky dataset with user stance labels. Preprint, arXiv:2506.07606. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "James A Russell. 1980. A circumplex model of affect. Journal of personality and social psychology, 39(6):1161. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "James A Russell. 2003. Core affect and the psychological construction of emotion. Psychological review, 110(1):145. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Shuvam Shiwakoti, Surendrabikram Thapa, Kritesh Rauniyar, Akshyat Shah, Aashish Bhandari, and Usman Naseem. 2024. Analyzing the dynamics of climate change discourse on Twitter: A new annotated corpus and multi-aspect classification. In Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation (LREC-COLING 2024), pages 984– 994, Torino, Italia. ELRA and ICCL. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Gemini Team and Google. 2025. Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long context, and next generation agentic capabilities. arXiv preprint arXiv:2507.06261. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Enrica Troiano, Sebastian Padó, and Roman Klinger. 2021. Emotion ratings: How intensity, annotation confidence and agreements are entangled. In Proceedings of the Eleventh Workshop on Computational Approaches to Subjectivity, Sentiment and Social Media Analysis, pages 40–49, Online. Association for Computational Linguistics. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Apoorva Upadhyaya, Marco Fisichella, and Wolfgang Nejdl. 2023a. Intensity-Valued Emotions Help Stance Detection of Climate Change Twitter Data. In Proceedings of the Thirty-Second International Joint Conference on Artificial Intelligence, pages 6246– 6254, Macau, SAR China. International Joint Conferences on Artificial Intelligence Organization. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Apoorva Upadhyaya, Marco Fisichella, and Wolfgang Nejdl. 2023b. Toxicity, Morality, and Speech Act Guided Stance Detection. In Findings of the Association for Computational Linguistics: EMNLP 2023, pages 4464–4478, Singapore. Association for Computational Linguistics. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Roopal Vaid, Kartikey Pant, and Manish Shrivastava. 2022. Towards Fine-grained Classification of Climate Change related Social Media Text. In Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics: Student Research Workshop, pages 434–443, Dublin, Ireland. Association for Computational Linguistics. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Jannis Vamvas and Rico Sennrich. 2020. X-Stance: A Multilingual Multi-Target Dataset for Stance Detection. arXiv preprint. ArXiv:2003.08385 [cs]. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Jan Philip Wahle, Terry Ruas, Saif M. Mohammad, Norman Meuschke, and Bela Gipp. 2024. Ai usage cards: Responsibly reporting ai-generated content. In Proceedings of the 2023 ACM/IEEE Joint Conference on Digital Libraries, JCDL ’23, page 282–284. IEEE Press. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Beiyu Xu, Zhiwei Liu, and Sophia Ananiadou. 2025. Disentangled VAD Representations via a Variational Framework for Political Stance Detection. arXiv preprint. ArXiv:2502.19276 [cs] version: 1. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "An Yang and 1 others. 2024. Qwen2.5 technical report. arXiv preprint arXiv:2412.15115. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Bowen Zhang, Genan Dai, Fuqiang Niu, Nan Yin, Xiaomao Fan, Senzhang Wang, Xiaochun Cao, and Hu Huang. 2024. A survey of stance detection on social media: New directions and perspectives. CoRR, abs/2409.15690. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "ZhaoDan Zhang, Jin Zhang, Xueqi Cheng, and Hui Xu. 2025. T-MAD: Target-driven multimodal alignment for stance detection. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing, pages 580–595, Suzhou, China. Association for Computational Linguistics. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "Chenye Zhao and Cornelia Caragea. 2024. EZSTANCE: A large dataset for English zero-shot stance detection. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 15697– 15714, Bangkok, Thailand. Association for Computational Linguistics. ",
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "",
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Chenye Zhao, Yingjie Li, and Cornelia Caragea. 2023. C-STANCE: A large dataset for Chinese zero-shot stance detection. In Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 13369– 13385, Toronto, Canada. Association for Computational Linguistics. ",
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Shijia Zhou, Siyao Peng, Simon M. Luebke, Jörg Haßler, Mario Haim, Saif M. Mohammad, and Barbara Plank. 2025. What media frames reveal about stance: A dataset and study about memes in climate change discourse. In Findings of the Association for Computational Linguistics: EMNLP 2025, pages 5337–5356. ",
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Elena Zotova, Rodrigo Agerri, Manuel Nuñez, and German Rigau. 2020. Multilingual Stance Detection in Tweets: The Catalonia Independence Corpus. In Proceedings of the Twelfth Language Resources and Evaluation Conference, pages 1368–1375, Marseille, France. European Language Resources Association. ",
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "Appendix ",
+        "text_level": 1,
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "A Implementation details. ",
+        "text_level": 1,
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "All experiments are implemented using the PyTorch-based implementations of both PLMs and LLMs provided by the Hugging Face Transformers library. We adopt the AdamW optimizer with a linear learning rate scheduler. The learning rate is fixed at 2e-5. The batch size is set to 16 for PLMs and 8 for LLMs. All models are fine-tuned for 5 training epochs. Experiments are conducted on NVIDIA H200 GPUs. ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "B Models Used ",
+        "text_level": 1,
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "B.1 PLMs ",
+        "text_level": 1,
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "1. https:/ /huggingface.co/google/rembert   \n2. https:/ /huggingface.co/ sentence-transformers/LaBSE   \n3. https:/ /huggingface.co/FacebookAI/ xlm-roberta-large ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "B.2 Open-Source LLMs ",
+        "text_level": 1,
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "1. https:/ /huggingface.co/mistralai/ Ministral-3-14B-Reasoning-2512   \n2. https:/ huggingface.co/ microsoft /phi-4   \n3. https:/ /huggingface.co/Qwen/Qwen2. 5-72B-Instruct   \n4. https:/ /huggingface.co/meta-llama/ Meta-Llama-3.3-70B ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "C Annotation Guidelines ",
+        "text_level": 1,
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "We summarize the annotation guidelines below. The dataset is annotated at the level of aspects extracted from stance texts. For each identified aspect, annotators assign affective ratings and assess aspect validity for automatically extracted aspects. The guidelines are designed to be consistent across languages, while allowing for language-specific realizations of aspects. ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Annotation Units. A target aspect denotes a concrete entity, attribute, or concept being discussed. A single text sample may contain multiple aspects, each annotated individually. ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Aspect, a specific part, feature, or attribute of an entity (e.g., product, service, or topic) that is the target of an expressed opinion. ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Affective Dimensions. Each valid aspect is annotated along two continuous emotional dimensions: ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Valence, capturing the degree of positivity or negativity of the expressed opinion, ranging from high negative (1) through neutral (5) to high positive (9). Arousal, capturing the intensity or emotional activation of the opinion, ranging from highly unaroused (1) to highly aroused (9). ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Annotators apply these dimensions jointly, following established affective patterns: emotionally charged opinions (both positive and negative) typically exhibit higher arousal, whereas neutral opinions tend to be associated with lower arousal. Implausible combinations of valence and arousal are avoided. ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Validity Judgment. In addition to affective ratings, annotators determine whether an extracted aspect is valid. Validity guidelines require: ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "splitting multiple aspects into separate aspects when applicable,   \ninclusion of relevant modifiers such as negation or intensifiers within the expression,   \nprecise and minimal spans for both aspect terms. ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Aspects that do not meet these criteria are marked as invalid and excluded from downstream use. ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "Cross-Lingual Consistency. Although the surface realization of aspects may vary across languages, the underlying annotation principles— including the definition of annotation units, affective dimensions, rating scales, and validity criteria— are applied uniformly across all language-specific datasets. ",
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "D Dataset Examples ",
+        "text_level": 1,
+        "page_idx": 13
+    },
+    {
+        "type": "table",
+        "img_path": "images/dde8b590610d51a5d86aa120bc11fa1a813f22572e929729c59aecd2d11639d8.jpg",
+        "table_caption": [
+            "Table 6: Examples from the DimStance datasets. Valence#arousal (V#A) refers to the highlighted target. "
+        ],
+        "table_footnote": [],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "E Annotation Interface",
+        "text_level": 1,
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Sentence It's great that after coal plants shut down there are transmisson lines to connect solar and wind resources too. 1. Aspect: solar and andwind wind resources ",
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/c5ec957e2ace8dc21d4aa80f699931f111221940370577707fd58c5dd0646d08.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "(a) Annotation interface (English). Annotators label valence and arousal on a Likert scale from 1–9. ",
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "Sentence：我覺得政府在綠能運輸的支持上還不狗.",
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "1.Aspect:綠能運輸的支持",
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/20f14efb6b1aabd94b160f47f28828b3f29162a49d7a51d754061b9b24d8ad50.jpg",
+        "img_caption": [],
+        "img_footnote": [],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "(b) Annotation interface (Chinese). Annotators label valence and arousal on a Likert scale from 1–9. ",
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/bff76db7e6b25ead6ac1b20f6acda37cf0548465625ee019b872d0f69c0e8874.jpg",
+        "img_caption": [
+            "Figure 5: Annotation interfaces used in our study. "
+        ],
+        "img_footnote": [],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "(c) HausaNLP ABSA annotation tool (Nigerian Pidgin and Swahili). Annotators are presented with suggested aspects and provide valence and arousal scores on a 1–9 slider. Suggested aspects can be corrected, discarded, or extended. ",
+        "page_idx": 14
+    },
+    {
+        "type": "image",
+        "img_path": "images/61a74225880a9489689e0165aee0e833d913dc1ecd3a475eee89e2cb444e12b6.jpg",
+        "img_caption": [
+            "Figure 6: Comparison between gold and predicted VA distributions across all test sets. "
+        ],
+        "img_footnote": [],
+        "page_idx": 15
+    },
+    {
+        "type": "table",
+        "img_path": "images/848ad8a6c85e75894babec1d991b1e51463268baa4981b27669669c1b1c8284c.jpg",
+        "table_caption": [
+            "Table 7: Prompt variants used in the ablation study for stance VA prediction. "
+        ],
+        "table_footnote": [],
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "H Usage of AI ",
+        "text_level": 1,
+        "page_idx": 16
+    },
+    {
+        "type": "text",
+        "text": "In the conduct of this research project, we used specific artificial intelligence tools and algorithms ChatGPT, Grammarly to assist with Writing. While these tools have augmented our capabilities and contributed to our findings, it’s pertinent to note that they have inherent limitations. We have made every effort to use AI in a transparent and responsible manner. Any conclusions drawn are result of combined human and machine insights. This is an automatic report generated with AI Usage Cards (Wahle et al., 2024). ",
+        "page_idx": 16
+    }
+]
